@@ -139,10 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="IndexLength.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="ReadFile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IndexLength.h" />
     <ClInclude Include="ReadFile.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

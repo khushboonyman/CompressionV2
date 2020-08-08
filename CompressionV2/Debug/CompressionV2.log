@@ -1,3 +1,4 @@
 ﻿  Source.cpp
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(39,23): warning C4834: discarding return value of function with 'nodiscard' attribute
+C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(13,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(49,23): warning C4834: discarding return value of function with 'nodiscard' attribute
   CompressionV2.vcxproj -> C:\Users\Bruger\source\repos\CompressionV2\Debug\CompressionV2.exe
