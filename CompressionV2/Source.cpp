@@ -2,17 +2,16 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
-
 #include "ReadFile.h"
+#include "IndexLength.h";
 
 using namespace std;
 
-#include <iostream>
-#include <string>
-#include <unordered_map>
-#include "IndexLength.h";
+unordered_map<string, vector<int>> fingerPrints;
+unordered_map<char, int> singleChar;
+int limit = 5;
 
-void printFingerPrint(unordered_map<string, vector<int>> fingerPrints) {
+void printFingerPrint() {
     unordered_map<string, vector<int>>::iterator itPrint = fingerPrints.begin();
     while (itPrint != fingerPrints.end()) {
         cout << "substring : " << itPrint->first << " : ";
@@ -25,12 +24,29 @@ void printFingerPrint(unordered_map<string, vector<int>> fingerPrints) {
     }
 }
 
-void printSingleChar(unordered_map<char, int> singleChar) {
+vector<int> findFingerPrint(string checkFingerPrint) {
+    unordered_map<string, vector<int>>::iterator itCheck = fingerPrints.find(checkFingerPrint);
+    vector<int> returnVector;
+    if (itCheck != fingerPrints.end()) {
+        returnVector = itCheck->second;
+    }
+    return returnVector;
+}
+
+void printSingleChar() {
     unordered_map<char, int>::iterator itChar = singleChar.begin();
     while (itChar != singleChar.end()) {
         cout << "char : " << itChar->first << " index : " << itChar->second<< endl;
         itChar++;
     }
+}
+
+int findSingleChar(char checkChar) {
+    unordered_map<char, int>::iterator itCheck = singleChar.find(checkChar);
+    if (itCheck != singleChar.end()) {
+        return itCheck->second;
+    }
+    return -1;
 }
 
 int main() {
@@ -44,14 +60,14 @@ int main() {
 
     string relativeString = dnaArray[0];
     //string relativeString = "abcdefghijabcdefghij";
-    unordered_map<string, vector<int>> fingerPrints;
-    unordered_map<char, int> singleChar;
+    //unordered_map<string, vector<int>> fingerPrints;
+    //unordered_map<char, int> singleChar;
     fingerPrints.empty();
     int relativeSize = relativeString.size();
 
     cout << "size is " << relativeSize;
-    for (i = 0; i <= relativeSize-10 ; i++) {
-        string fingerPrint = relativeString.substr(i, 10);
+    for (i = 0; i <= relativeSize-limit ; i++) {
+        string fingerPrint = relativeString.substr(i, limit);
         char single = relativeString[i];
         unordered_map<string, vector<int>>::const_iterator it = fingerPrints.find(fingerPrint);
         unordered_map<char, int>::const_iterator itC = singleChar.find(single);
@@ -70,16 +86,33 @@ int main() {
         }
     }
     //printFingerPrint(fingerPrints);
-    /*string stringToCompress = dnaArray[1];
-    int j = 0;
-    while (j < stringToCompress.size()) {
-        j++;
+    //IndexLength il = IndexLength(0, 0);
+    printSingleChar();
+    string toCompress = dnaArray[1];
+    int start = 0;
+    int end = toCompress.size();
+    int countNotFound = 0;
+    while (start <= end-limit) {
+        
+        vector<int> indices;
+        string checkFingerPrint;
+        checkFingerPrint = toCompress.substr(start, limit);
+        indices = findFingerPrint(checkFingerPrint);
+        if (indices.size() == 0) {
+            //cout << "start " << start << " " << end << endl;
+            int index = findSingleChar(toCompress[start]);
+            if (index == -1) {
+                cout << "char not found " << toCompress[start] <<endl ;
+            }
+            start++;
+            countNotFound++;
+        }
+        else {
+            start += limit;
+        }
     }
 
-    IndexLength il = IndexLength(0, 0);
-    cout << il.getIndex() << " " << il.getLength();
-    */
-    printSingleChar(singleChar);
+    cout << "not found" << countNotFound;
     delete[] dnaArray;
 }
     
