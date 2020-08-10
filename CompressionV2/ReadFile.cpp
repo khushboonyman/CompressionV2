@@ -49,6 +49,9 @@ string* ReadDna(string location, int size) {
         }
     }
 
+    temp += "$";
+    dnaArray[size] = temp;
+
     myfile.close();
     cout << endl << "file closed" << endl ;
     
