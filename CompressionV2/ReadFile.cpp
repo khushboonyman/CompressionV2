@@ -50,7 +50,7 @@ string* ReadDna(string location, int size) {
     }
 
     myfile.close();
-    cout << endl << "file closed";
+    cout << endl << "file closed" << endl ;
     
     return dnaArray;
 }
