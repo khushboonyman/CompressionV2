@@ -19,7 +19,7 @@ int countNotFound = 0;
 void printCompressed(vector<IndexLength> compressedVector) {
     for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
         IndexLength il = *itV;
-        cout << il.getIndex() << " " << il.getLength() << endl;
+        cout << il.getIndex() << " " << il.getLength() << " " << il.getCumulativeIndex() << endl;
     }
 }
 
@@ -110,7 +110,7 @@ vector<IndexLength> compress(string toCompress) {
                 countNotFound++;
                 notFound.insert(toCompress[start]);
             }
-            IndexLength il = IndexLength(index, 1);
+            IndexLength il = IndexLength(index, 1,start);
             compressedVector.push_back(il);
             start++;
             countSingleChar++;
@@ -145,7 +145,7 @@ vector<IndexLength> compress(string toCompress) {
                     max_index = *itV;
                 }
             }
-            IndexLength il = IndexLength(max_index, max_length);
+            IndexLength il = IndexLength(max_index, max_length, start);
             compressedVector.push_back(il);
             start += max_length;
         }
@@ -159,7 +159,7 @@ vector<IndexLength> compress(string toCompress) {
             notFound.insert(toCompress[start]);
         }
 
-        IndexLength il = IndexLength(index, 1);
+        IndexLength il = IndexLength(index, 1, start);
         compressedVector.push_back(il);
         start++;
         countSingleChar++;
@@ -190,7 +190,7 @@ int main() {
 
     // first string can be compressed to itself
     vector<IndexLength> vIL;
-    IndexLength il = IndexLength(0, relativeSize - 1);
+    IndexLength il = IndexLength(0, relativeSize - 1, 0);
     vIL.push_back(il);
     compressedVectors[0] = vIL;
 
