@@ -2,23 +2,23 @@
 class IndexLength
 {
 private:
-	int index;
+	int indexRelative;
 	int length;
-	int cumulativeIndex;
+	int indexCString;
 public :
-	IndexLength(int index, int length, int cumulativeIndex) {
-		this->index = index;
+	IndexLength(int indexRelative, int length, int indexCString) {
+		this->indexRelative = indexRelative;
 		this->length = length;
-		this->cumulativeIndex = cumulativeIndex;
+		this->indexCString = indexCString;
 	}
-	int getIndex() {
-		return this->index;
+	int getIndexRelative() {
+		return this->indexRelative;
 	}
 	int getLength() {
 		return this->length;
 	}
-	int getCumulativeLength() {
-		return this->cumulativeIndex;
+	int getIndexCString() {
+		return this->indexCString;
 	}
 };
 

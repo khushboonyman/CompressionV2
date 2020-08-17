@@ -16,10 +16,10 @@ int countSingleChar = 0;
 int countNotFound = 0;
 
 
-void printCompressed(vector<IndexLength> compressedVector) {
+void printCompressed(vector<IndexLength> &compressedVector) {
     for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
         IndexLength il = *itV;
-        cout << il.getIndex() << " " << il.getLength() << " " << il.getCumulativeIndex() << endl;
+        cout << il.getIndexRelative() << " " << il.getLength() << " " << il.getIndexCString() << endl;
     }
 }
 
@@ -36,7 +36,7 @@ void printFingerPrint() {
     }
 }
 
-vector<int> findFingerPrint(string checkFingerPrint) {
+vector<int> findFingerPrint(string &checkFingerPrint) {
     unordered_map<string, vector<int>>::iterator itCheck = fingerPrints.find(checkFingerPrint);
     vector<int> returnVector;
     if (itCheck != fingerPrints.end()) {
@@ -53,7 +53,7 @@ void printSingleChar() {
     }
 }
 
-int findSingleChar(char checkChar) {
+int findSingleChar(char &checkChar) {
     unordered_map<char, int>::iterator itCheck = singleChar.find(checkChar);
     if (itCheck != singleChar.end()) {
         return itCheck->second;
@@ -93,7 +93,7 @@ void setFingerPrintSingleChar() {
     }
 }
 
-vector<IndexLength> compress(string toCompress) {
+vector<IndexLength> compress(string &toCompress) {
     vector<IndexLength> compressedVector;
     int start = 0;
     int end = toCompress.size();
@@ -167,6 +167,16 @@ vector<IndexLength> compress(string toCompress) {
     return compressedVector;
 }
 
+char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
+    int sizeOfVector = compressedVector.size();
+    int index = sizeOfVector / 2;
+    while (true) {
+        //if(compressedVector[index].getIndexCString() == charIndex)
+        break;
+    }
+}
+
+
 int main() {
     int i;
     string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\embl50.h178.fa";
@@ -194,16 +204,30 @@ int main() {
     vIL.push_back(il);
     compressedVectors[0] = vIL;
 
-    for (int j = 1; j < numberOfStrings; j++) {
+    for (int j = 0; j < numberOfStrings; j++) {
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
-        cout << "printing compressed info : " <<j<<" "<< compressedVector.size() <<" " << toCompress.size() << endl;
+        cout << "printing compressed info : string number " <<j<<" size of vector : "<< compressedVector.size() <<" size of original string : " << toCompress.size() << endl;
     }
 
     cout << "single character compressions" << countSingleChar << endl ;
     cout << "single character not found " << countNotFound << " number of different chars " << notFound.size() <<endl ;
 
+    char response;
+    int stringIndex, charIndex;
+    /*while(true) {
+        cout << " do you want to retrieve a character ? Y/N " << endl;
+        cin >> response;
+        if (toupper(response) != 'Y')
+            break;
+        cout << "enter string number starting from 0 " << endl;
+        cin >> stringIndex;
+        cout << "enter index within the string " << endl;
+        cin >> charIndex;
+        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        char found = findCharacter(compressedVector, charIndex);
+    }*/
     delete[] dnaArray;
     delete[] compressedVectors;
 }
