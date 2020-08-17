@@ -97,7 +97,7 @@ vector<IndexLength> compress(string &toCompress) {
     vector<IndexLength> compressedVector;
     int start = 0;
     int end = toCompress.size();
-    cout << "compressing" << endl;
+    //cout << "compressing" << endl;
 
     while (start <= end - limit) {
         vector<int> indices;
@@ -173,7 +173,7 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
     int count = 0;
     IndexLength ilTemp;
     while (true) {
-        cout << "char index " << charIndex << " mid " << mid << " first " << first << " last " << last;
+        //cout << "char index " << charIndex << " mid " << mid << " first " << first << " last " << last;
         ilTemp = compressedVector[mid];
         if (ilTemp.getIndexCString() <= charIndex && ilTemp.getIndexCString() + ilTemp.getLength() - 1 >= charIndex) {
             break;
@@ -190,7 +190,7 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
             break;
         }
     }
-    int distance = charIndex - mid;
+    int distance = charIndex - ilTemp.getIndexCString();
     cout << "we return this index " << ilTemp.getIndexRelative() + distance << endl ;
     return relativeString[ilTemp.getIndexRelative() + distance];
 }
@@ -198,13 +198,20 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
 
 int main() {
     int i;
-    string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\embl50.h178.fa";
+    string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
+    //file name here : embl50.h178.fa
+    //location += "test_dataset.txt";
+    location += "embl50.h178.fa";
     int numberOfStrings = FindSize(location);
     cout << numberOfStrings ;
 
     string* dnaArray = new string[numberOfStrings];
     dnaArray = ReadDna(location, numberOfStrings);
+    int* sizes = new int[numberOfStrings];
 
+    for (i = 0; i < numberOfStrings; i++) {
+        sizes[i] = dnaArray[i].size();
+    }
     relativeString = dnaArray[0];
     
     fingerPrints.empty();
@@ -227,12 +234,13 @@ int main() {
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
-        cout << "printing compressed info : string number " <<j<<" size of vector : "<< compressedVector.size() <<" size of original string : " << toCompress.size() << endl;
+        //printCompressed(compressedVector);
+        //cout << "printing compressed info : string number " <<j<<" size of vector : "<< compressedVector.size() <<" size of original string : " << toCompress.size() << endl;
     }
 
-    cout << "single character compressions" << countSingleChar << endl ;
-    cout << "single character not found " << countNotFound << " number of different chars " << notFound.size() <<endl ;
-
+    //cout << "single character compressions" << countSingleChar << endl ;
+    //cout << "single character not found " << countNotFound << " number of different chars " << notFound.size() <<endl ;
+    delete[] dnaArray;
     char response;
     int stringIndex, charIndex;
     while(true) {
@@ -240,15 +248,23 @@ int main() {
         cin >> response;
         if (toupper(response) != 'Y')
             break;
-        cout << "enter string number starting from 0 " << endl;
+        cout << "enter string index starting from 0 " << endl;
         cin >> stringIndex;
+        if (stringIndex < 0 || stringIndex > numberOfStrings - 1) {
+            cout << "you entered a wrong string index" << endl ;
+            continue;
+        }
         cout << "enter index within the string " << endl;
         cin >> charIndex;
+        if (charIndex < 0 || charIndex > sizes[stringIndex] - 1) {
+            cout << "the string is not that long " << endl;
+            continue;
+        }
         vector<IndexLength> compressedVector = compressedVectors[stringIndex];
         char found = findCharacter(compressedVector, charIndex);
         cout << "your character is " << found;
     }
-    delete[] dnaArray;
+    
     delete[] compressedVectors;
 }
     
