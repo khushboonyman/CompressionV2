@@ -11,6 +11,9 @@ public :
 		this->length = length;
 		this->indexCString = indexCString;
 	}
+	IndexLength() {
+		IndexLength(0, 0, 0);
+	}
 	int getIndexRelative() {
 		return this->indexRelative;
 	}

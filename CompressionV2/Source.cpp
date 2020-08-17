@@ -168,12 +168,31 @@ vector<IndexLength> compress(string &toCompress) {
 }
 
 char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
-    int sizeOfVector = compressedVector.size();
-    int index = sizeOfVector / 2;
+    int first = 0, last = compressedVector.size(), mid ;
+    mid = last / 2;
+    int count = 0;
+    IndexLength ilTemp;
     while (true) {
-        //if(compressedVector[index].getIndexCString() == charIndex)
-        break;
+        cout << "char index " << charIndex << " mid " << mid << " first " << first << " last " << last;
+        ilTemp = compressedVector[mid];
+        if (ilTemp.getIndexCString() <= charIndex && ilTemp.getIndexCString() + ilTemp.getLength() - 1 >= charIndex) {
+            break;
+        }
+        if (ilTemp.getIndexCString() > charIndex) {
+            last = mid ;
+        }
+        else {
+            first = mid ;
+        }
+        mid = (first + last) / 2;
+        count++;
+        if (count > 1000) {
+            break;
+        }
     }
+    int distance = charIndex - mid;
+    cout << "we return this index " << ilTemp.getIndexRelative() + distance << endl ;
+    return relativeString[ilTemp.getIndexRelative() + distance];
 }
 
 
@@ -216,7 +235,7 @@ int main() {
 
     char response;
     int stringIndex, charIndex;
-    /*while(true) {
+    while(true) {
         cout << " do you want to retrieve a character ? Y/N " << endl;
         cin >> response;
         if (toupper(response) != 'Y')
@@ -227,7 +246,8 @@ int main() {
         cin >> charIndex;
         vector<IndexLength> compressedVector = compressedVectors[stringIndex];
         char found = findCharacter(compressedVector, charIndex);
-    }*/
+        cout << "your character is " << found;
+    }
     delete[] dnaArray;
     delete[] compressedVectors;
 }
