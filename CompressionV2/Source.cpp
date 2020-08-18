@@ -11,13 +11,10 @@ using namespace chrono;
 
 unordered_map<string, vector<int>> fingerPrints;
 unordered_map<char, int> singleChar;
-set<char> notFound;
 int limit = 5;
 string relativeString;
 int relativeSize;
 int countSingleChar = 0;
-int countNotFound = 0;
-
 
 void printCompressed(vector<IndexLength> &compressedVector) {
     for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
@@ -96,28 +93,36 @@ void setFingerPrintSingleChar() {
     }
 }
 
+int expandRelative(char charToAdd) {
+    relativeString += charToAdd;
+    relativeSize += 1;
+    singleChar[charToAdd] = relativeSize - 1 ;
+    return relativeSize - 1;
+}
+
 vector<IndexLength> compress(string &toCompress) {
     vector<IndexLength> compressedVector;
     int start = 0;
     int end = toCompress.size();
-    //cout << "compressing" << endl;
 
     while (start <= end - limit) {
         vector<int> indices;
         string checkFingerPrint;
         checkFingerPrint = toCompress.substr(start, limit);
         indices = findFingerPrint(checkFingerPrint);
+        //limit size substring fingerprint not found
         if (indices.size() == 0) {
             int index = findSingleChar(toCompress[start]);
             if (index == -1) {
-                countNotFound++;
-                notFound.insert(toCompress[start]);
+                cout << "char not found : " << toCompress[start] << endl;
+                index = expandRelative(toCompress[start]);
             }
             IndexLength il = IndexLength(index, 1,start);
             compressedVector.push_back(il);
             start++;
             countSingleChar++;
         }
+        //fingerprint(s) found, so now we find the longest substring that matches through the fingerprint(s)
         else {
             int max_length = limit;
             int max_index = -1;
@@ -158,8 +163,8 @@ vector<IndexLength> compress(string &toCompress) {
         int index = findSingleChar(toCompress[start]);
 
         if (index == -1) {
-            countNotFound++;
-            notFound.insert(toCompress[start]);
+            cout << "char not found : " << toCompress[start] << endl;
+            index = expandRelative(toCompress[start]);
         }
 
         IndexLength il = IndexLength(index, 1, start);
@@ -236,7 +241,7 @@ int main() {
     compressedVectors[0] = vIL;   
 
     for (int j = 0; j < numberOfStrings; j++) {
-        cout << "compressing " << j << endl;
+        //cout << "compressing " << j << endl;
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
@@ -248,7 +253,6 @@ int main() {
     auto duration = duration_cast<seconds>(stop - start);
     cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
     //cout << "single character compressions" << countSingleChar << endl ;
-    //cout << "single character not found " << countNotFound << " number of different chars " << notFound.size() <<endl ;
     delete[] dnaArray;
     char response;
     int stringIndex, charIndex;
