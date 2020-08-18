@@ -215,7 +215,7 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
     int distance = charIndex - ilTemp.getIndexCString();
     int indexOnRelative = ilTemp.getIndexRelative() + distance;
     string toReturn(1,relativeString[indexOnRelative]);
-    cout << "first index " << indexOnRelative << " to return " << toReturn;
+    //cout << "first index " << indexOnRelative << " to return " << toReturn;
     length--;
     while (true) {
         if (length == 0)
@@ -243,8 +243,8 @@ int main() {
     int i;
     string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
     //file name here : embl50.h178.fa
-    location += "test_dataset.txt";
-    //location += "embl50.h178.fa";
+    //location += "test_dataset.txt";
+    location += "embl50.h178.fa";
     int numberOfStrings = FindSize(location);
 
     string* dnaArray = new string[numberOfStrings];
@@ -279,7 +279,7 @@ int main() {
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
-        printCompressed(compressedVector);
+        //printCompressed(compressedVector);
         //cout << "printing compressed info : string number " <<j<<" size of vector : "<< compressedVector.size() <<" size of original string : " << toCompress.size() << endl;
     }
     
