@@ -1,4 +1,6 @@
-﻿  Source.cpp
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(7,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(217,23): warning C4834: discarding return value of function with 'nodiscard' attribute
+﻿  ReadFile.cpp
+  Source.cpp
+C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(8,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(219,23): warning C4834: discarding return value of function with 'nodiscard' attribute
+  Generating Code...
   CompressionV2.vcxproj -> C:\Users\Bruger\source\repos\CompressionV2\Debug\CompressionV2.exe

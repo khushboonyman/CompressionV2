@@ -38,7 +38,7 @@ string* ReadDna(string location, int size) {
     while (myfile >> x) {
         if (x[0] == '>') {
             if (size > -1) {
-                temp += "$";
+                //temp += "$";
                 dnaArray[size] = temp;
             }
             temp = "";
@@ -49,7 +49,7 @@ string* ReadDna(string location, int size) {
         }
     }
 
-    temp += "$";
+    //temp += "$";
     dnaArray[size] = temp;
 
     myfile.close();

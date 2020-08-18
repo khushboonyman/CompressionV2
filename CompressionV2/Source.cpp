@@ -3,8 +3,11 @@
 #include <string>
 #include <unordered_map>
 #include<set>
+#include <chrono>
 #include "ReadFile.h"
 #include "IndexLength.h";
+
+using namespace chrono;
 
 unordered_map<string, vector<int>> fingerPrints;
 unordered_map<char, int> singleChar;
@@ -191,7 +194,7 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
         }
     }
     int distance = charIndex - ilTemp.getIndexCString();
-    cout << "we return this index " << ilTemp.getIndexRelative() + distance << endl ;
+    cout << "we return this index from the relative string " << ilTemp.getIndexRelative() + distance << endl ;
     return relativeString[ilTemp.getIndexRelative() + distance];
 }
 
@@ -203,7 +206,6 @@ int main() {
     //location += "test_dataset.txt";
     location += "embl50.h178.fa";
     int numberOfStrings = FindSize(location);
-    cout << numberOfStrings ;
 
     string* dnaArray = new string[numberOfStrings];
     dnaArray = ReadDna(location, numberOfStrings);
@@ -217,27 +219,34 @@ int main() {
     fingerPrints.empty();
     relativeSize = relativeString.size();
 
-    cout << "size of relative string is " << relativeSize << endl ;
+    cout << "total number of strings : " << numberOfStrings << " and size of relative string : " << relativeSize << endl ;
 
     setFingerPrintSingleChar();
     printSingleChar();
 
     vector<IndexLength>* compressedVectors = new vector<IndexLength> [numberOfStrings];
 
+    //to check how long it takes to compress all the data
+    auto start = high_resolution_clock::now();
+
     // first string can be compressed to itself
     vector<IndexLength> vIL;
     IndexLength il = IndexLength(0, relativeSize - 1, 0);
     vIL.push_back(il);
-    compressedVectors[0] = vIL;
+    compressedVectors[0] = vIL;   
 
     for (int j = 0; j < numberOfStrings; j++) {
+        cout << "compressing " << j << endl;
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
         //printCompressed(compressedVector);
         //cout << "printing compressed info : string number " <<j<<" size of vector : "<< compressedVector.size() <<" size of original string : " << toCompress.size() << endl;
     }
-
+    
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<seconds>(stop - start);
+    cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
     //cout << "single character compressions" << countSingleChar << endl ;
     //cout << "single character not found " << countNotFound << " number of different chars " << notFound.size() <<endl ;
     delete[] dnaArray;
@@ -261,8 +270,17 @@ int main() {
             continue;
         }
         vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        //measuring time start
+        auto start = high_resolution_clock::now();
+
+        //this function finds the character from the compressed datastructure
         char found = findCharacter(compressedVector, charIndex);
-        cout << "your character is " << found;
+        
+        //measuring time end
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout << "your character is " << found <<" it took " << duration.count() << " milliseconds " << endl ;
     }
     
     delete[] compressedVectors;
