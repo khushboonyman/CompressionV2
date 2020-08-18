@@ -175,8 +175,8 @@ vector<IndexLength> compress(string &toCompress) {
     return compressedVector;
 }
 
-char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
-    int first = 0, last = compressedVector.size(), mid ;
+int findLocation(vector<IndexLength>& compressedVector, int& charIndex) {
+    int first = 0, last = compressedVector.size(), mid;
     mid = last / 2;
     int count = 0;
     IndexLength ilTemp;
@@ -187,10 +187,10 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
             break;
         }
         if (ilTemp.getIndexCString() > charIndex) {
-            last = mid ;
+            last = mid;
         }
         else {
-            first = mid ;
+            first = mid;
         }
         mid = (first + last) / 2;
         count++;
@@ -198,11 +198,46 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
             break;
         }
     }
+    return mid;
+}
+
+char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
+    int indexFound = findLocation(compressedVector, charIndex);
+    IndexLength ilTemp = compressedVector[indexFound];
     int distance = charIndex - ilTemp.getIndexCString();
     cout << "we return this index from the relative string " << ilTemp.getIndexRelative() + distance << endl ;
     return relativeString[ilTemp.getIndexRelative() + distance];
 }
 
+string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int& length) {
+    int indexFound = findLocation(compressedVector, charIndex);
+    IndexLength ilTemp = compressedVector[indexFound];
+    int distance = charIndex - ilTemp.getIndexCString();
+    int indexOnRelative = ilTemp.getIndexRelative() + distance;
+    string toReturn(1,relativeString[indexOnRelative]);
+    cout << "first index " << indexOnRelative << " to return " << toReturn;
+    length--;
+    while (true) {
+        if (length == 0)
+            break;
+        if (indexOnRelative - ilTemp.getIndexRelative() + 1 <= ilTemp.getLength()) {
+            indexOnRelative ++;
+        }
+        else {
+            if (indexFound < compressedVector.size() - 1) {
+                indexFound ++;
+            }
+            else {
+                break;
+            }
+            ilTemp = compressedVector[indexFound];
+            indexOnRelative = ilTemp.getIndexRelative();
+        }
+        toReturn += relativeString[indexOnRelative];
+        length--;
+    }
+    return toReturn ;
+}
 
 int main() {
     int i;
@@ -241,7 +276,6 @@ int main() {
     compressedVectors[0] = vIL;   
 
     for (int j = 0; j < numberOfStrings; j++) {
-        //cout << "compressing " << j << endl;
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
@@ -255,7 +289,7 @@ int main() {
     //cout << "single character compressions" << countSingleChar << endl ;
     delete[] dnaArray;
     char response;
-    int stringIndex, charIndex;
+    int stringIndex, charIndex, subStringLength;
     while(true) {
         cout << " do you want to retrieve a character ? Y/N " << endl;
         cin >> response;
@@ -278,15 +312,55 @@ int main() {
         auto start = high_resolution_clock::now();
 
         //this function finds the character from the compressed datastructure
-        char found = findCharacter(compressedVector, charIndex);
+        char charFound = findCharacter(compressedVector, charIndex);
         
         //measuring time end
         auto stop = high_resolution_clock::now();
         auto duration = duration_cast<milliseconds>(stop - start);
 
-        cout << "your character is " << found <<" it took " << duration.count() << " milliseconds " << endl ;
+        cout << "your character is " << charFound <<" it took " << duration.count() << " milliseconds " << endl ;
     }
     
+    while (true) {
+
+        cout << " do you want to retrieve a substring ? Y/N " << endl;
+        cin >> response;
+        if (toupper(response) != 'Y')
+            break;
+        cout << "enter string index starting from 0 " << endl;
+        cin >> stringIndex;
+        if (stringIndex < 0 || stringIndex > numberOfStrings - 1) {
+            cout << "you entered a wrong string index" << endl;
+            continue;
+        }
+        cout << "enter index within the string " << endl;
+        cin >> charIndex;
+        if (charIndex < 0 || charIndex > sizes[stringIndex] - 1) {
+            cout << "the string is not that long " << endl;
+            continue;
+        }
+
+        cout << "enter length of substring " << endl;
+        cin >> subStringLength;
+        if (subStringLength < 0) {
+            cout << "length can't be negative " << endl;
+            continue;
+        }
+
+        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        //measuring time start
+        auto start = high_resolution_clock::now();
+
+        //this function finds the character from the compressed datastructure
+        string subStringFound = findSubString(compressedVector, charIndex, subStringLength);
+
+        //measuring time end
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout << "your substring is " << subStringFound << " it took " << duration.count() << " milliseconds " << endl;
+    }
+
     delete[] compressedVectors;
 }
     
