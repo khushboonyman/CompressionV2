@@ -2,10 +2,11 @@
 #include <fstream>
 #include <string>
 #include "ReadFile.h"
+#include "windows.h"
 
 using namespace std;
 
-int FindSize(string location) {
+int findSize(string location) {
     ifstream myfile;
     myfile.open(location);
     cout << "file read" << endl;
@@ -24,7 +25,7 @@ int FindSize(string location) {
     return size;
 }
 
-string* ReadDna(string location, int size) {
+string* readDna(string location, int size) {
     
     ifstream myfile;
 
@@ -56,4 +57,16 @@ string* ReadDna(string location, int size) {
     cout << endl << "file closed" << endl ;
     
     return dnaArray;
+}
+
+void writeLog(string location, int version, DWORDLONG memoryDna, DWORDLONG memoryFingerPrint, DWORDLONG memoryCompressed, int memoryVar, int time) {
+    fstream myfile;
+    myfile.open(location,fstream::app);
+    cout << "file opened" << endl;
+
+    // + memoryDna+ ";"+ memoryFingerPrint + ";" + memoryCompressed + ";" + memoryVar + ";" + time;
+    myfile << "\n";
+    myfile << version << ";" << memoryDna << ";" << memoryFingerPrint << ";" << memoryCompressed << ";" << memoryVar << ";" << time ;
+    myfile.close();
+    cout << "file closed" << endl;
 }

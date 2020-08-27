@@ -1,7 +1,11 @@
 #include <string>
 #include <iostream>
+#include "windows.h"
+
 using namespace std;
 
-int FindSize(string location);
+int findSize(string location);
 
-string* ReadDna(string location, int size);
+string* readDna(string location, int size);
+
+void writeLog(string location, int version, DWORDLONG memoryDna, DWORDLONG memoryFingerPrint, DWORDLONG memoryCompressed, int memoryVar, int time);

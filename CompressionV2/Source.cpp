@@ -8,6 +8,7 @@
 #include "IndexLength.h";
 #include "windows.h"
 #include "psapi.h"
+#include <math.h>
 
 using namespace chrono;
 
@@ -250,7 +251,7 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
     return toReturn ;
 }
 
-void memoryUsage() {
+DWORDLONG memoryUsage() {
     //**************************************PHYSICAL MEMORY (RAM)******************************************
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
@@ -263,26 +264,24 @@ void memoryUsage() {
     DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
 
     //Physical memory used by current process
-    SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-
-    cout << "Physical memory in MB used " << physMemUsed / mb << " used by current process " << physMemUsedByMe / mb <<" memory used by variables " << memoryVar <<endl;
+    //SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+    return physMemUsed;
 }
 
 int main() {
     cout << "PROGRAM STARTING!!!" << endl;
-
-    memoryUsage();
-
+    DWORDLONG memoryDna, memoryFingerPrint, memoryCompressed;
+    
     int i;
-    string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
+    string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
     //file name here
-    //location += "embl50.h178.fa";
-    location += "Gen178.fa";
-    int numberOfStrings = FindSize(location);
+    string location = location_main + "embl50.h178.fa";
+    //string location = location_main + "Gen178.fa";
+    int numberOfStrings = findSize(location);
 
     string* dnaArray = new string[numberOfStrings];
 
-    dnaArray = ReadDna(location, numberOfStrings);
+    dnaArray = readDna(location, numberOfStrings);
 
     int* sizes = new int[numberOfStrings];
 
@@ -290,8 +289,8 @@ int main() {
         sizes[i] = dnaArray[i].size();
     }
 
-    cout << "CREATED dnaArray !!!" << endl;
-    memoryUsage();
+    cout << "DNA ARRAY !!!" << endl;
+    memoryDna = memoryUsage();
 
     relativeString = dnaArray[0];
     memoryVar += sizeof(relativeString);  //adding space for reference string
@@ -310,7 +309,7 @@ int main() {
     auto start = high_resolution_clock::now();
 
     cout << "BEFORE COMPRESSION !!!" << endl;
-    memoryUsage();
+    memoryFingerPrint = memoryUsage();
 
     // first string can be compressed to itself
     vector<IndexLength> vIL;
@@ -324,13 +323,12 @@ int main() {
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
         memoryVar += sizeof(compressedVectors[j]); //adding space for encoding
-        cout << memoryVar << endl; //TEST, need to remove
         //printCompressed(compressedVector);
     }
 
     delete[] dnaArray;
     cout << "AFTER COMPRESSION!!!" << endl;
-    memoryUsage();
+    memoryCompressed = memoryUsage();
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(stop - start);
@@ -415,5 +413,12 @@ int main() {
     cout << "PROGRAM ENDING!!!" << endl;
     memoryUsage();
     cout << memoryHash/mb;
+
+    //string headers = "VERSION;RAM_DNA;RAM_FINGERPRINT;RAM_COMPRESSED;VARIABLES;TIME";
+    location = location_main + "LOGS.csv";
+    //change according to new version
+    int version = 2;
+    int timeUsed = 0;     
+    writeLog(location, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), timeUsed);
 }
     
