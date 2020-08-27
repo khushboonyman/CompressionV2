@@ -6,6 +6,8 @@
 #include <chrono>
 #include "ReadFile.h"
 #include "IndexLength.h";
+#include "windows.h"
+#include "psapi.h"
 
 using namespace chrono;
 
@@ -239,6 +241,25 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
     return toReturn ;
 }
 
+void memoryUsage() {
+    //**************************************VIRTUAL MEMORY******************************************
+    //Total virtual memory
+    MEMORYSTATUSEX memInfo;
+    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+    GlobalMemoryStatusEx(&memInfo);
+    DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+
+    //Virtual memory currently used
+    DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
+
+    //Virtual memory used by current process
+    PROCESS_MEMORY_COUNTERS_EX pmc;
+    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+    SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
+
+    cout << "Virtual memory in MB " << totalVirtualMem/(1024*1024) <<" used " << virtualMemUsed/(1024 * 1024) <<" used by current process "<< virtualMemUsedByMe/(1024 * 1024) << endl;
+}
+
 int main() {
     int i;
     string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
@@ -248,12 +269,17 @@ int main() {
     int numberOfStrings = FindSize(location);
 
     string* dnaArray = new string[numberOfStrings];
+
+    cout << " test BEFORE : " << dnaArray->size() << " capacity : " << dnaArray->capacity() << endl;
     dnaArray = ReadDna(location, numberOfStrings);
+    cout << " test AFTER : " << dnaArray->size() << " capacity : " << dnaArray->capacity() << endl;
+
     int* sizes = new int[numberOfStrings];
 
     for (i = 0; i < numberOfStrings; i++) {
         sizes[i] = dnaArray[i].size();
     }
+
     relativeString = dnaArray[0];
     
     fingerPrints.empty();
@@ -280,9 +306,10 @@ int main() {
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
         //printCompressed(compressedVector);
-        //cout << "printing compressed info : string number " <<j<<" size of vector : "<< compressedVector.size() <<" size of original string : " << toCompress.size() << endl;
     }
-    
+
+    cout << " TEST size : " << compressedVectors->size() << " capacity : " << compressedVectors->capacity() << endl;
+
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(stop - start);
     cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
@@ -362,5 +389,8 @@ int main() {
     }
 
     delete[] compressedVectors;
+
+    memoryUsage();
+
 }
     
