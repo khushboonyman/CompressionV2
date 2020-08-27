@@ -17,6 +17,10 @@ int limit = 5;
 string relativeString;
 int relativeSize;
 int countSingleChar = 0;
+int memoryVar = 0;
+int memoryHash = 0;
+DWORDLONG mb = 1024 * 1024;
+DWORDLONG kb = 1024;
 
 void printCompressed(vector<IndexLength> &compressedVector) {
     for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
@@ -72,16 +76,22 @@ void setFingerPrintSingleChar() {
         unordered_map<char, int>::const_iterator itC = singleChar.find(single);
         if (itC == singleChar.end()) {
             singleChar[single] = i;
+            memoryHash += sizeof(singleChar);
+            cout << "hash singlechar " << memoryHash << endl;
         }
         if (it == fingerPrints.end()) {
             vector<int> newVector;
             newVector.push_back(i);
             fingerPrints[fingerPrint] = newVector;
+            memoryHash += sizeof(fingerPrints);
+            //cout << "hash fingerprint " << memoryHash << endl;
         }
         else {
             vector<int> existingVector = it->second;
             existingVector.push_back(i);
             fingerPrints[fingerPrint] = existingVector;
+            memoryHash += sizeof(fingerPrints);
+            //cout << "hash more vector " << memoryHash << endl;
         }
     }
 
@@ -183,7 +193,6 @@ int findLocation(vector<IndexLength>& compressedVector, int& charIndex) {
     int count = 0;
     IndexLength ilTemp;
     while (true) {
-        //cout << "char index " << charIndex << " mid " << mid << " first " << first << " last " << last;
         ilTemp = compressedVector[mid];
         if (ilTemp.getIndexCString() <= charIndex && ilTemp.getIndexCString() + ilTemp.getLength() - 1 >= charIndex) {
             break;
@@ -217,8 +226,8 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
     int distance = charIndex - ilTemp.getIndexCString();
     int indexOnRelative = ilTemp.getIndexRelative() + distance;
     string toReturn(1,relativeString[indexOnRelative]);
-    //cout << "first index " << indexOnRelative << " to return " << toReturn;
     length--;
+
     while (true) {
         if (length == 0)
             break;
@@ -242,37 +251,38 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
 }
 
 void memoryUsage() {
-    //**************************************VIRTUAL MEMORY******************************************
-    //Total virtual memory
+    //**************************************PHYSICAL MEMORY (RAM)******************************************
     MEMORYSTATUSEX memInfo;
     memInfo.dwLength = sizeof(MEMORYSTATUSEX);
     GlobalMemoryStatusEx(&memInfo);
-    DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
 
-    //Virtual memory currently used
-    DWORDLONG virtualMemUsed = memInfo.ullTotalPageFile - memInfo.ullAvailPageFile;
-
-    //Virtual memory used by current process
     PROCESS_MEMORY_COUNTERS_EX pmc;
     GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-    SIZE_T virtualMemUsedByMe = pmc.PrivateUsage;
 
-    cout << "Virtual memory in MB " << totalVirtualMem/(1024*1024) <<" used " << virtualMemUsed/(1024 * 1024) <<" used by current process "<< virtualMemUsedByMe/(1024 * 1024) << endl;
+    //Physical memory used
+    DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
+
+    //Physical memory used by current process
+    SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
+
+    cout << "Physical memory in MB used " << physMemUsed / mb << " used by current process " << physMemUsedByMe / mb <<" memory used by variables " << memoryVar <<endl;
 }
 
 int main() {
+    cout << "PROGRAM STARTING!!!" << endl;
+
+    memoryUsage();
+
     int i;
     string location = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
-    //file name here : embl50.h178.fa
-    //location += "test_dataset.txt";
-    location += "embl50.h178.fa";
+    //file name here
+    //location += "embl50.h178.fa";
+    location += "Gen178.fa";
     int numberOfStrings = FindSize(location);
 
     string* dnaArray = new string[numberOfStrings];
 
-    cout << " test BEFORE : " << dnaArray->size() << " capacity : " << dnaArray->capacity() << endl;
     dnaArray = ReadDna(location, numberOfStrings);
-    cout << " test AFTER : " << dnaArray->size() << " capacity : " << dnaArray->capacity() << endl;
 
     int* sizes = new int[numberOfStrings];
 
@@ -280,8 +290,12 @@ int main() {
         sizes[i] = dnaArray[i].size();
     }
 
+    cout << "CREATED dnaArray !!!" << endl;
+    memoryUsage();
+
     relativeString = dnaArray[0];
-    
+    memoryVar += sizeof(relativeString);  //adding space for reference string
+
     fingerPrints.empty();
     relativeSize = relativeString.size();
 
@@ -295,26 +309,33 @@ int main() {
     //to check how long it takes to compress all the data
     auto start = high_resolution_clock::now();
 
+    cout << "BEFORE COMPRESSION !!!" << endl;
+    memoryUsage();
+
     // first string can be compressed to itself
     vector<IndexLength> vIL;
     IndexLength il = IndexLength(0, relativeSize - 1, 0);
     vIL.push_back(il);
     compressedVectors[0] = vIL;   
 
-    for (int j = 0; j < numberOfStrings; j++) {
+    for (int j = 1; j < numberOfStrings; j++) {
+        cout << "compressing " << j << endl ;
         string toCompress = dnaArray[j];
         vector<IndexLength> compressedVector = compress(toCompress);
         compressedVectors[j] = compressedVector;
+        memoryVar += sizeof(compressedVectors[j]); //adding space for encoding
+        cout << memoryVar << endl; //TEST, need to remove
         //printCompressed(compressedVector);
     }
 
-    cout << " TEST size : " << compressedVectors->size() << " capacity : " << compressedVectors->capacity() << endl;
+    delete[] dnaArray;
+    cout << "AFTER COMPRESSION!!!" << endl;
+    memoryUsage();
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(stop - start);
     cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
-    //cout << "single character compressions" << countSingleChar << endl ;
-    delete[] dnaArray;
+    
     char response;
     int stringIndex, charIndex, subStringLength;
     while(true) {
@@ -388,9 +409,11 @@ int main() {
         cout << "your substring is " << subStringFound << " it took " << duration.count() << " milliseconds " << endl;
     }
 
+    delete[] sizes;
     delete[] compressedVectors;
 
+    cout << "PROGRAM ENDING!!!" << endl;
     memoryUsage();
-
+    cout << memoryHash/mb;
 }
     

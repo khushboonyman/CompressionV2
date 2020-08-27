@@ -1,5 +1,5 @@
 ﻿  Source.cpp
 C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(8,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(229,28): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(285,23): warning C4834: discarding return value of function with 'nodiscard' attribute
+C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(238,28): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(299,23): warning C4834: discarding return value of function with 'nodiscard' attribute
   CompressionV2.vcxproj -> C:\Users\Bruger\source\repos\CompressionV2\Debug\CompressionV2.exe
