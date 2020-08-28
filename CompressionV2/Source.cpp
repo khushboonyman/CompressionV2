@@ -217,7 +217,6 @@ char findCharacter(vector<IndexLength> &compressedVector, int &charIndex) {
     int indexFound = findLocation(compressedVector, charIndex);
     IndexLength ilTemp = compressedVector[indexFound];
     int distance = charIndex - ilTemp.getIndexCString();
-    cout << "we return this index from the relative string " << ilTemp.getIndexRelative() + distance << endl ;
     return relativeString[ilTemp.getIndexRelative() + distance];
 }
 
@@ -305,7 +304,6 @@ void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes, vector<I
     }
 }
 
-
 void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
 
     char response;
@@ -350,6 +348,30 @@ void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLeng
 
         cout << "your substring is " << subStringFound << " it took " << duration.count() << " milliseconds " << endl;
     }
+}
+
+auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
+
+    int counter = 0;
+    int stringIndex, charIndex;
+    //measuring time start
+    auto start = high_resolution_clock::now();
+
+    while (counter<1000000) {
+        if (counter % 10000 == 0) {
+            cout << counter << endl;
+        }
+        stringIndex = rand() % (numberOfStrings - 1);
+        charIndex = rand() % (sizes[stringIndex] - 1);
+        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        //this function finds the character from the compressed datastructure
+        char charFound = findCharacter(compressedVector, charIndex);
+        counter++;
+    }
+    //measuring time end
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    return duration;
 }
 
 int main() {
@@ -420,9 +442,12 @@ int main() {
     auto duration = duration_cast<seconds>(stop - start);
     cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
 
-    processSingleCharRequestFromUser(numberOfStrings,sizes,compressedVectors);
-    
-    processSubstringFromUser(numberOfStrings, sizes, compressedVectors);
+    //processSingleCharRequestFromUser(numberOfStrings,sizes,compressedVectors);
+    //processSubstringFromUser(numberOfStrings, sizes, compressedVectors);
+
+    auto durationMillion = processMillionRequest(numberOfStrings, sizes, compressedVectors);
+
+    cout << durationMillion.count() <<" milliseconds to process million requests ";
 
     delete[] sizes;
     delete[] compressedVectors;
@@ -436,6 +461,6 @@ int main() {
     //change according to new version
     int version = 2;
     int timeUsed = 0;     
-    writeLog(location, fileName, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), timeUsed);
+    writeLog(location, fileName, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), durationMillion.count());
 }
     
