@@ -268,6 +268,90 @@ DWORDLONG memoryUsage() {
     return physMemUsed;
 }
 
+void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
+
+    char response;
+    int stringIndex, charIndex;
+
+    while (true) {
+        cout << " do you want to retrieve a character ? Y/N " << endl;
+        cin >> response;
+        if (toupper(response) != 'Y')
+            break;
+        cout << "enter string index starting from 0 " << endl;
+        cin >> stringIndex;
+        if (stringIndex < 0 || stringIndex > numberOfStrings - 1) {
+            cout << "you entered a wrong string index" << endl;
+            continue;
+        }
+        cout << "enter index within the string " << endl;
+        cin >> charIndex;
+        if (charIndex < 0 || charIndex > sizes[stringIndex] - 1) {
+            cout << "the string is not that long " << endl;
+            continue;
+        }
+        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        //measuring time start
+        auto start = high_resolution_clock::now();
+
+        //this function finds the character from the compressed datastructure
+        char charFound = findCharacter(compressedVector, charIndex);
+
+        //measuring time end
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout << "your character is " << charFound << " it took " << duration.count() << " milliseconds " << endl;
+    }
+}
+
+
+void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
+
+    char response;
+    int stringIndex, charIndex, subStringLength;
+
+    while (true) {
+
+        cout << " do you want to retrieve a substring ? Y/N " << endl;
+        cin >> response;
+        if (toupper(response) != 'Y')
+            break;
+        cout << "enter string index starting from 0 " << endl;
+        cin >> stringIndex;
+        if (stringIndex < 0 || stringIndex > numberOfStrings - 1) {
+            cout << "you entered a wrong string index" << endl;
+            continue;
+        }
+        cout << "enter index within the string " << endl;
+        cin >> charIndex;
+        if (charIndex < 0 || charIndex > sizes[stringIndex] - 1) {
+            cout << "the string is not that long " << endl;
+            continue;
+        }
+
+        cout << "enter length of substring " << endl;
+        cin >> subStringLength;
+        if (subStringLength < 0) {
+            cout << "length can't be negative " << endl;
+            continue;
+        }
+
+        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        //measuring time start
+        auto start = high_resolution_clock::now();
+
+        //this function finds the character from the compressed datastructure
+        string subStringFound = findSubString(compressedVector, charIndex, subStringLength);
+
+        //measuring time end
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+
+        cout << "your substring is " << subStringFound << " it took " << duration.count() << " milliseconds " << endl;
+    }
+}
+
 int main() {
     cout << "PROGRAM STARTING!!!" << endl;
     DWORDLONG memoryDna, memoryFingerPrint, memoryCompressed;
@@ -275,8 +359,10 @@ int main() {
     int i;
     string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
     //file name here
-    string location = location_main + "embl50.h178.fa";
-    //string location = location_main + "Gen178.fa";
+    //string fileName = "Gen178.fa";
+    string fileName = "embl50.h178.fa";
+    string location = location_main + fileName ;
+    
     int numberOfStrings = findSize(location);
 
     string* dnaArray = new string[numberOfStrings];
@@ -333,79 +419,10 @@ int main() {
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(stop - start);
     cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
+
+    processSingleCharRequestFromUser(numberOfStrings,sizes,compressedVectors);
     
-    char response;
-    int stringIndex, charIndex, subStringLength;
-    while(true) {
-        cout << " do you want to retrieve a character ? Y/N " << endl;
-        cin >> response;
-        if (toupper(response) != 'Y')
-            break;
-        cout << "enter string index starting from 0 " << endl;
-        cin >> stringIndex;
-        if (stringIndex < 0 || stringIndex > numberOfStrings - 1) {
-            cout << "you entered a wrong string index" << endl ;
-            continue;
-        }
-        cout << "enter index within the string " << endl;
-        cin >> charIndex;
-        if (charIndex < 0 || charIndex > sizes[stringIndex] - 1) {
-            cout << "the string is not that long " << endl;
-            continue;
-        }
-        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
-        //measuring time start
-        auto start = high_resolution_clock::now();
-
-        //this function finds the character from the compressed datastructure
-        char charFound = findCharacter(compressedVector, charIndex);
-        
-        //measuring time end
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
-
-        cout << "your character is " << charFound <<" it took " << duration.count() << " milliseconds " << endl ;
-    }
-    
-    while (true) {
-
-        cout << " do you want to retrieve a substring ? Y/N " << endl;
-        cin >> response;
-        if (toupper(response) != 'Y')
-            break;
-        cout << "enter string index starting from 0 " << endl;
-        cin >> stringIndex;
-        if (stringIndex < 0 || stringIndex > numberOfStrings - 1) {
-            cout << "you entered a wrong string index" << endl;
-            continue;
-        }
-        cout << "enter index within the string " << endl;
-        cin >> charIndex;
-        if (charIndex < 0 || charIndex > sizes[stringIndex] - 1) {
-            cout << "the string is not that long " << endl;
-            continue;
-        }
-
-        cout << "enter length of substring " << endl;
-        cin >> subStringLength;
-        if (subStringLength < 0) {
-            cout << "length can't be negative " << endl;
-            continue;
-        }
-
-        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
-        //measuring time start
-        auto start = high_resolution_clock::now();
-
-        //this function finds the character from the compressed datastructure
-        string subStringFound = findSubString(compressedVector, charIndex, subStringLength);
-
-        //measuring time end
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
-
-        cout << "your substring is " << subStringFound << " it took " << duration.count() << " milliseconds " << endl;
-    }
+    processSubstringFromUser(numberOfStrings, sizes, compressedVectors);
 
     delete[] sizes;
     delete[] compressedVectors;
@@ -419,6 +436,6 @@ int main() {
     //change according to new version
     int version = 2;
     int timeUsed = 0;     
-    writeLog(location, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), timeUsed);
+    writeLog(location, fileName, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), timeUsed);
 }
     

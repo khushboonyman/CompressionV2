@@ -59,14 +59,14 @@ string* readDna(string location, int size) {
     return dnaArray;
 }
 
-void writeLog(string location, int version, DWORDLONG memoryDna, DWORDLONG memoryFingerPrint, DWORDLONG memoryCompressed, int memoryVar, int time) {
+void writeLog(string location, string fileName, int version, DWORDLONG memoryDna, DWORDLONG memoryFingerPrint, DWORDLONG memoryCompressed, int memoryVar, int time) {
     fstream myfile;
     myfile.open(location,fstream::app);
     cout << "file opened" << endl;
 
     // + memoryDna+ ";"+ memoryFingerPrint + ";" + memoryCompressed + ";" + memoryVar + ";" + time;
     myfile << "\n";
-    myfile << version << ";" << memoryDna << ";" << memoryFingerPrint << ";" << memoryCompressed << ";" << memoryVar << ";" << time ;
+    myfile << fileName << ";" << version << ";" << memoryDna << ";" << memoryFingerPrint << ";" << memoryCompressed << ";" << memoryVar << ";" << time ;
     myfile.close();
     cout << "file closed" << endl;
 }
