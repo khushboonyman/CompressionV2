@@ -381,8 +381,8 @@ int main() {
     int i;
     string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
     //file name here
-    //string fileName = "Gen178.fa";
-    string fileName = "embl50.h178.fa";
+    string fileName = "Gen178.fa";
+    //string fileName = "embl50.h178.fa";
     string location = location_main + fileName ;
     
     int numberOfStrings = findSize(location);
@@ -461,6 +461,7 @@ int main() {
     //change according to new version
     int version = 2;
     int timeUsed = 0;     
-    writeLog(location, fileName, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), durationMillion.count());
+    //writeLog(location, fileName, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), durationMillion.count());
+    writeLog(location, fileName, version, memoryDna, memoryFingerPrint, memoryCompressed, memoryVar, durationMillion.count());
 }
     
