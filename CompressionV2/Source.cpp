@@ -13,6 +13,8 @@
 using namespace chrono;
 //change according to new version
 int version = 2;
+//int runLimit = 10000;
+int runLimit = 1000000;
 unordered_map<string, vector<int>> fingerPrints;
 unordered_map<char, int> singleChar;
 int limit = 5;
@@ -20,9 +22,8 @@ string relativeString;
 int relativeSize;
 int countSingleChar = 0;
 int memoryVar = 0;
-int memoryHash = 0;
-DWORDLONG mb = 1024 * 1024;
-DWORDLONG kb = 1024;
+int mb = 1024 * 1024;
+int kb = 1024;
 
 void printCompressed(vector<IndexLength> &compressedVector) {
     for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
@@ -78,22 +79,16 @@ void setFingerPrintSingleChar() {
         unordered_map<char, int>::const_iterator itC = singleChar.find(single);
         if (itC == singleChar.end()) {
             singleChar[single] = i;
-            memoryHash += sizeof(singleChar);
-            cout << "hash singlechar " << memoryHash << endl;
         }
         if (it == fingerPrints.end()) {
             vector<int> newVector;
             newVector.push_back(i);
             fingerPrints[fingerPrint] = newVector;
-            memoryHash += sizeof(fingerPrints);
-            //cout << "hash fingerprint " << memoryHash << endl;
         }
         else {
             vector<int> existingVector = it->second;
             existingVector.push_back(i);
             fingerPrints[fingerPrint] = existingVector;
-            memoryHash += sizeof(fingerPrints);
-            //cout << "hash more vector " << memoryHash << endl;
         }
     }
 
@@ -190,26 +185,40 @@ vector<IndexLength> compress(string &toCompress) {
 }
 
 int findLocation(vector<IndexLength>& compressedVector, int& charIndex) {
-    int first = 0, last = compressedVector.size(), mid;
-    mid = last / 2;
-    int count = 0;
-    IndexLength ilTemp;
+    //int count = 0;
+    int first = 0; 
+    int last = (charIndex < compressedVector.size() ? charIndex : compressedVector.size() - 1);
+    //int last = compressedVector.size() - 1;
+    int mid = last / 2;
+    IndexLength ilTemp, ilTempNext;
     while (true) {
+        
         ilTemp = compressedVector[mid];
         if (ilTemp.getIndexCString() <= charIndex && ilTemp.getIndexCString() + ilTemp.getLength() - 1 >= charIndex) {
             break;
         }
+        if (mid < compressedVector.size()-1) {
+            ilTempNext = compressedVector[mid+1];
+            if (ilTempNext.getIndexCString() <= charIndex && ilTempNext.getIndexCString() + ilTempNext.getLength() - 1 >= charIndex) {
+                mid++;
+                break;
+            }
+        }
+
         if (ilTemp.getIndexCString() > charIndex) {
             last = mid;
         }
         else {
             first = mid;
         }
+
         mid = (first + last) / 2;
-        count++;
+        /*count++;
         if (count > 1000) {
-            break;
+            cout << "first " << first << " mid " << mid << " last " << last << "index search " << charIndex << " "<< ilTemp.getIndexCString()<<" "<< ilTemp.getLength()<<endl;
         }
+        if (count > 1100)
+            break;*/           
     }
     return mid;
 }
@@ -249,23 +258,6 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
         length--;
     }
     return toReturn ;
-}
-
-DWORDLONG memoryUsage() {
-    //**************************************PHYSICAL MEMORY (RAM)******************************************
-    MEMORYSTATUSEX memInfo;
-    memInfo.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx(&memInfo);
-
-    PROCESS_MEMORY_COUNTERS_EX pmc;
-    GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-
-    //Physical memory used
-    DWORDLONG physMemUsed = memInfo.ullTotalPhys - memInfo.ullAvailPhys;
-
-    //Physical memory used by current process
-    //SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-    return physMemUsed;
 }
 
 void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
@@ -353,12 +345,14 @@ void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLeng
 
 auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
 
+    cout << " processing million requests " << endl;
+
     int counter = 0;
     int stringIndex, charIndex;
     //measuring time start
     auto start = high_resolution_clock::now();
 
-    while (counter<1000000) {
+    while (counter<runLimit) {
         if (counter % 10000 == 0) {
             cout << counter << endl;
         }
@@ -377,13 +371,12 @@ auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>
 
 int main() {
     cout << "PROGRAM STARTING!!!" << endl;
-    DWORDLONG memoryDna, memoryFingerPrint, memoryCompressed;
     
     int i;
     string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
     //file name here
-    //string fileName = "Gen178.fa";
-    string fileName = "embl50.h178.fa";
+    string fileName = "Gen178.fa";
+    //string fileName = "embl50.h178.fa";
     string location = location_main + fileName ;
     
     int numberOfStrings = findSize(location);
@@ -399,10 +392,11 @@ int main() {
     }
 
     cout << "DNA ARRAY !!!" << endl;
-    memoryDna = memoryUsage();
 
     relativeString = dnaArray[0];
     memoryVar += sizeof(relativeString);  //adding space for reference string
+
+    cout << "size of relative string " << memoryVar << endl;
 
     fingerPrints.empty();
     relativeSize = relativeString.size();
@@ -418,7 +412,6 @@ int main() {
     auto start = high_resolution_clock::now();
 
     cout << "BEFORE COMPRESSION !!!" << endl;
-    memoryFingerPrint = memoryUsage();
 
     // first string can be compressed to itself
     vector<IndexLength> vIL;
@@ -437,7 +430,6 @@ int main() {
 
     delete[] dnaArray;
     cout << "AFTER COMPRESSION!!!" << endl;
-    memoryCompressed = memoryUsage();
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<seconds>(stop - start);
@@ -454,13 +446,10 @@ int main() {
     delete[] compressedVectors;
 
     cout << "PROGRAM ENDING!!!" << endl;
-    memoryUsage();
-    cout << memoryHash/mb;
 
-    //string headers = "VERSION;RAM_DNA;RAM_FINGERPRINT;RAM_COMPRESSED;VARIABLES;TIME";
+    //string headers = "FILE_NAME;VERSION;MEMORY;TIME";
     location = location_main + "LOGS.csv";
     int timeUsed = 0;     
-    //writeLog(location, fileName, version, ceil(memoryDna/kb), ceil(memoryFingerPrint/kb), ceil(memoryCompressed/kb), ceil(memoryVar/kb), durationMillion.count());
-    writeLog(location, fileName, version, memoryDna, memoryFingerPrint, memoryCompressed, memoryVar, durationMillion.count());
+    writeLog(location, fileName, version, memoryVar, durationMillion.count());
 }
     
