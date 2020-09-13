@@ -18,17 +18,11 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ReadFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="IndexLength.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ReadFile.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="IndexLength.h">
       <Filter>Header Files</Filter>
     </ClInclude>

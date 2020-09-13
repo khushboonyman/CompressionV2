@@ -1,11 +1,1 @@
-﻿  Source.cpp
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(190,27): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(200,17): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(248,28): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(401,23): warning C4834: discarding return value of function with 'nodiscard' attribute
-C:\Users\Bruger\source\repos\CompressionV2\CompressionV2\Source.cpp(453,75): warning C4244: 'argument': conversion from '_Rep' to 'int', possible loss of data
-          with
-          [
-              _Rep=__int64
-          ]
-  CompressionV2.vcxproj -> C:\Users\Bruger\source\repos\CompressionV2\Debug\CompressionV2.exe
+﻿  CompressionV2.vcxproj -> C:\Users\Bruger\source\repos\CompressionV2\Debug\CompressionV2.exe

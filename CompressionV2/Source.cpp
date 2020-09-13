@@ -2,15 +2,13 @@
 #include <fstream>
 #include <string>
 #include <unordered_map>
-#include<set>
-#include <chrono>
-#include "ReadFile.h"
+#include <set>
 #include "IndexLength.h"
-#include "windows.h"
-#include "psapi.h"
 #include <math.h>
+#include <chrono>
 
-using namespace chrono;
+using namespace std;
+
 //change according to new version
 int version = 2;
 //int runLimit = 10000;
@@ -24,6 +22,72 @@ int countSingleChar = 0;
 int memoryVar = 0;
 int mb = 1024 * 1024;
 int kb = 1024;
+
+int findSize(string location) {
+    ifstream myfile;
+    myfile.open(location);
+    cout << "file read" << endl;
+
+    string x;
+    int size = 0;
+
+    while (myfile >> x) {
+        if (x[0] == '>') {
+            size += 1;
+        }
+    }
+
+    myfile.close();
+
+    return size;
+}
+
+string* readDna(string location, int size) {
+
+    ifstream myfile;
+
+    string* dnaArray;
+    dnaArray = new string[size];
+
+    myfile.open(location);
+
+    size = -1;
+    string temp, x;
+    while (myfile >> x) {
+        if (x[0] == '>') {
+            if (size > -1) {
+                //temp += "$";
+                dnaArray[size] = temp;
+            }
+            temp = "";
+            size += 1;
+        }
+        else {
+            temp += x;
+        }
+    }
+
+    //temp += "$";
+    dnaArray[size] = temp;
+
+    myfile.close();
+    cout << endl << "file closed" << endl;
+
+    return dnaArray;
+}
+
+void writeLog(string location, string fileName, int version, int memoryVar, int time) {
+    fstream myfile;
+    myfile.open(location, fstream::app);
+    cout << "file opened" << endl;
+
+    // + memoryDna+ ";"+ memoryFingerPrint + ";" + memoryCompressed + ";" + memoryVar + ";" + time;
+    myfile << "\n";
+    myfile << fileName << ";" << version << ";" << memoryVar << ";" << time;
+    myfile.close();
+    cout << "file closed" << endl;
+}
+
 
 void printCompressed(vector<IndexLength> &compressedVector) {
     for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
@@ -185,10 +249,9 @@ vector<IndexLength> compress(string &toCompress) {
 }
 
 int findLocation(vector<IndexLength>& compressedVector, int& charIndex) {
-    //int count = 0;
     int first = 0; 
-    int last = (charIndex < compressedVector.size() ? charIndex : compressedVector.size() - 1);
-    //int last = compressedVector.size() - 1;
+    //int last = ((charIndex < compressedVector.size()) ? charIndex : (compressedVector.size() - 1));
+    int last = compressedVector.size() - 1;
     int mid = last / 2;
     IndexLength ilTemp, ilTempNext;
     while (true) {
@@ -197,7 +260,7 @@ int findLocation(vector<IndexLength>& compressedVector, int& charIndex) {
         if (ilTemp.getIndexCString() <= charIndex && ilTemp.getIndexCString() + ilTemp.getLength() - 1 >= charIndex) {
             break;
         }
-        if (mid < compressedVector.size()-1) {
+        if (mid < (int)(compressedVector.size()-1)) {
             ilTempNext = compressedVector[mid+1];
             if (ilTempNext.getIndexCString() <= charIndex && ilTempNext.getIndexCString() + ilTempNext.getLength() - 1 >= charIndex) {
                 mid++;
@@ -212,13 +275,7 @@ int findLocation(vector<IndexLength>& compressedVector, int& charIndex) {
             first = mid;
         }
 
-        mid = (first + last) / 2;
-        /*count++;
-        if (count > 1000) {
-            cout << "first " << first << " mid " << mid << " last " << last << "index search " << charIndex << " "<< ilTemp.getIndexCString()<<" "<< ilTemp.getLength()<<endl;
-        }
-        if (count > 1100)
-            break;*/           
+        mid = (first + last) / 2;          
     }
     return mid;
 }
@@ -245,7 +302,7 @@ string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int&
             indexOnRelative ++;
         }
         else {
-            if (indexFound < compressedVector.size() - 1) {
+            if (indexFound < (int)(compressedVector.size() - 1)) {
                 indexFound ++;
             }
             else {
@@ -284,14 +341,14 @@ void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes, vector<I
         }
         vector<IndexLength> compressedVector = compressedVectors[stringIndex];
         //measuring time start
-        auto start = high_resolution_clock::now();
+        auto start = chrono::high_resolution_clock::now();
 
         //this function finds the character from the compressed datastructure
         char charFound = findCharacter(compressedVector, charIndex);
 
         //measuring time end
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
+        auto stop = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
 
         cout << "your character is " << charFound << " it took " << duration.count() << " milliseconds " << endl;
     }
@@ -330,14 +387,14 @@ void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLeng
 
         vector<IndexLength> compressedVector = compressedVectors[stringIndex];
         //measuring time start
-        auto start = high_resolution_clock::now();
+        auto start = chrono::high_resolution_clock::now();
 
         //this function finds the character from the compressed datastructure
         string subStringFound = findSubString(compressedVector, charIndex, subStringLength);
 
         //measuring time end
-        auto stop = high_resolution_clock::now();
-        auto duration = duration_cast<milliseconds>(stop - start);
+        auto stop = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
 
         cout << "your substring is " << subStringFound << " it took " << duration.count() << " milliseconds " << endl;
     }
@@ -350,7 +407,7 @@ auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>
     int counter = 0;
     int stringIndex, charIndex;
     //measuring time start
-    auto start = high_resolution_clock::now();
+    auto start = chrono::high_resolution_clock::now();
 
     while (counter<runLimit) {
         if (counter % 10000 == 0) {
@@ -364,8 +421,8 @@ auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>
         counter++;
     }
     //measuring time end
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(stop - start);
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
     return duration;
 }
 
@@ -375,8 +432,8 @@ int main() {
     int i;
     string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
     //file name here
-    string fileName = "Gen178.fa";
-    //string fileName = "embl50.h178.fa";
+    //string fileName = "Gen178.fa";
+    string fileName = "embl50.h178.fa";
     string location = location_main + fileName ;
     
     int numberOfStrings = findSize(location);
@@ -398,7 +455,7 @@ int main() {
 
     cout << "size of relative string " << memoryVar << endl;
 
-    fingerPrints.empty();
+    //fingerPrints.empty();
     relativeSize = relativeString.size();
 
     cout << "total number of strings : " << numberOfStrings << " and size of relative string : " << relativeSize << endl ;
@@ -409,7 +466,7 @@ int main() {
     vector<IndexLength>* compressedVectors = new vector<IndexLength> [numberOfStrings];
 
     //to check how long it takes to compress all the data
-    auto start = high_resolution_clock::now();
+    auto start = chrono::high_resolution_clock::now();
 
     cout << "BEFORE COMPRESSION !!!" << endl;
 
@@ -431,8 +488,8 @@ int main() {
     delete[] dnaArray;
     cout << "AFTER COMPRESSION!!!" << endl;
 
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<seconds>(stop - start);
+    auto stop = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::seconds>(stop - start);
     cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
 
     //processSingleCharRequestFromUser(numberOfStrings,sizes,compressedVectors);
@@ -450,6 +507,6 @@ int main() {
     //string headers = "FILE_NAME;VERSION;MEMORY;TIME";
     location = location_main + "LOGS.csv";
     int timeUsed = 0;     
-    writeLog(location, fileName, version, memoryVar, durationMillion.count());
+    writeLog(location, fileName, version, memoryVar, (int) durationMillion.count());
 }
     
