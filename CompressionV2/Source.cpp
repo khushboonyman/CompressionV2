@@ -3,14 +3,14 @@
 #include <string>
 #include <unordered_map>
 #include <set>
-#include "IndexLength.h"
 #include <math.h>
 #include <chrono>
 using namespace std;
 
 //change according to new version
 int version = 2;
-//int runLimit = 10000;
+string* dnaArray;
+//int runLimit = 10;
 int runLimit = 1000000;
 unordered_map<string, vector<int>> fingerPrints;
 unordered_map<char, int> singleChar;
@@ -19,8 +19,13 @@ string relativeString;
 int relativeSize;
 int countSingleChar = 0;
 int memoryVar = 0;
+int memoryOld = 0;
 int mb = 1024 * 1024;
 int kb = 1024;
+string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
+//file name here
+string fileName = "Gen178.fa";
+//string fileName = "embl50.h178.fa";
 vector<int>* indexRelative;
 vector<int>* indexCString;
 
@@ -82,11 +87,11 @@ void writeLog(string location, string fileName, int version, int memoryVar, int 
 }
 
 //PRINT DATA STORED BY THE COMPRESSED DATASTRUCTURE : INDEX OF MAIN STRING + INDEX OF RELATIVE STRING  
-void printCompressed(vector<IndexLength> &compressedVector) {
-    for (vector<IndexLength>::iterator itV = compressedVector.begin(); itV != compressedVector.end(); itV++) {
-        IndexLength il = *itV;
-        cout << il.getIndexRelative() << " " << il.getLength() << " " << il.getIndexCString() << endl;
-    }
+void printCompressed(vector<int>& indexRelativeElement, vector<int>& indexCString) {
+    cout << " size of relative indices " << indexRelativeElement.size() << " " << indexCString.size() << endl;
+    /*for (int i = 0; i < indexRelativeElement.size();i++) {
+        cout << indexRelativeElement[i] << " " << indexCString[i] << endl;
+    }*/
 }
 
 //PRINT THE FINGERPRINT DATA : SUBSTRING + LIST OF INDICES IN THE STRING
@@ -233,7 +238,7 @@ void compress(string& toCompress, vector<int>& indexRelativeElement, vector<int>
             index = expandRelative(toCompress[start]);
         }
         indexRelativeElement.push_back(index);
-        indexCString->push_back(start);
+        indexCStringElement.push_back(start);
         start++;
         countSingleChar++;
     }
@@ -241,20 +246,26 @@ void compress(string& toCompress, vector<int>& indexRelativeElement, vector<int>
 
 //FIND LOCATION OF THE INDEX OF SEARCHED STRING IN THE RELATIVE STRING
 int findLocation(vector<int>&indexCStringElement, int& charIndex) {
+    int count = 0;
     int first = 0; 
     int last = ((charIndex < (int)indexCStringElement.size()) ? charIndex : (indexCStringElement.size() - 1));
     //int last = indexCStringElement.size() - 1;
     int mid = last / 2;
     int indexCStringCurrent, indexCStringNext, indexCStringNextNext;
     while (true) {
+        count++;
+        if (count > 1000) {
+            cout << "limit reached" << endl;
+            break;
+        }
         indexCStringCurrent = indexCStringElement[mid];
 
-        if (mid < (int)(indexRelativeElement.size() - 1)) {
+        if (mid < (int)(indexCStringElement.size() - 1)) {
             indexCStringNext = indexCStringElement[mid+1];
             if (indexCStringCurrent <= charIndex && indexCStringNext > charIndex) {
                 break;
             }
-            if (mid < (int)(indexRelativeElement.size() - 2)) {
+            if (mid < (int)(indexCStringElement.size() - 2)) {
                 indexCStringNextNext = indexCStringElement[mid + 2];
                 if (indexCStringNext <= charIndex && indexCStringNextNext > charIndex) {
                     mid++;
@@ -288,40 +299,44 @@ char findCharacter(vector<int> &indexRelativeElement, vector<int>& indexCStringE
 }
 
 //FIND SUBSTRING FROM THE SEARCHED STRING, INPUT IS START INDEX AND LENGTH OF SUBSTRING
-//KHUSH : FIX IT 
-string findSubString(vector<IndexLength>& compressedVector, int& charIndex, int& length) {
+string findSubString(vector<int>& indexRelativeElement, vector<int>& indexCStringElement, int& charIndex, int& length) {
     int indexFound = findLocation(indexCStringElement, charIndex);
-    IndexLength ilTemp = compressedVector[indexFound];
-    int distance = charIndex - ilTemp.getIndexCString();
-    int indexOnRelative = ilTemp.getIndexRelative() + distance;
+    int distance = charIndex - indexCStringElement[indexFound];
+    int indexOnRelative = indexRelativeElement[indexFound] + distance;   
     string toReturn(1,relativeString[indexOnRelative]);
     length--;
+    charIndex++;
 
     while (true) {
         if (length == 0)
             break;
-        if (indexOnRelative - ilTemp.getIndexRelative() + 1 < ilTemp.getLength()) {
-            indexOnRelative ++;
-        }
-        else {
-            if (indexFound < (int)(compressedVector.size() - 1)) {
-                indexFound ++;
+        if (indexFound < indexRelativeElement.size()) {
+            int nextIndex = indexFound + 1;
+            if (charIndex < indexCStringElement[nextIndex]) {
+                indexOnRelative++;
             }
             else {
-                break;
+                if (indexFound < (int)indexCStringElement.size() - 1) {
+                    indexFound++;
+                }
+                else {
+                    break;
+                }
+                indexOnRelative = indexRelativeElement[indexFound];
             }
-            ilTemp = compressedVector[indexFound];
-            indexOnRelative = ilTemp.getIndexRelative();
         }
+        else
+            indexOnRelative++;
+        
         toReturn += relativeString[indexOnRelative];
         length--;
+        charIndex++;
     }
     return toReturn ;
 }
 
 //PROCESS REQUEST FROM THE USER, WHERE INPUT IS WHICH STRING NUMBER (FROM 0) + INDEX WITHIN THE STRING
-void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes, vector<int>* indexRelative, vector<int>* indexCString) {
-
+void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes) {
     char response;
     int stringIndex, charIndex;
 
@@ -359,7 +374,7 @@ void processSingleCharRequestFromUser(int &numberOfStrings, int* sizes, vector<i
 }
 
 //PROCESS REQUEST FROM THE USER, WHERE INPUT IS WHICH STRING NUMBER (FROM 0) + INDEX WITHIN THE STRING + SIZE OF THE SUBSTRING BEING SEARCHED
-void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
+void processSubstringFromUser(int& numberOfStrings, int* sizes) {
 
     char response;
     int stringIndex, charIndex, subStringLength;
@@ -390,12 +405,13 @@ void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLeng
             continue;
         }
 
-        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        vector<int> indexRelativeElement = indexRelative[stringIndex];
+        vector<int> indexCStringElement = indexCString[stringIndex];
         //measuring time start
         auto start = chrono::high_resolution_clock::now();
 
         //this function finds the character from the compressed datastructure
-        string subStringFound = findSubString(compressedVector, charIndex, subStringLength);
+        string subStringFound = findSubString(indexRelativeElement, indexCStringElement, charIndex, subStringLength);
 
         //measuring time end
         auto stop = chrono::high_resolution_clock::now();
@@ -406,10 +422,8 @@ void processSubstringFromUser(int& numberOfStrings, int* sizes, vector<IndexLeng
 }
 
 //PROCESS ONE MILLION REQUESTS OF FINDING A CHARACTER ON A RANDOM INDEX FROM A RANDOM STRING
-auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>* compressedVectors) {
-
+auto processMillionRequest(int& numberOfStrings, int* sizes) {
     cout << " processing million requests " << endl;
-
     int counter = 0;
     int stringIndex, charIndex;
     //measuring time start
@@ -421,9 +435,12 @@ auto processMillionRequest(int& numberOfStrings, int* sizes, vector<IndexLength>
         }
         stringIndex = rand() % (numberOfStrings - 1);
         charIndex = rand() % (sizes[stringIndex] - 1);
-        vector<IndexLength> compressedVector = compressedVectors[stringIndex];
+        
+        vector<int> indexRelativeElement = indexRelative[stringIndex];
+        vector<int> indexCStringElement = indexCString[stringIndex];
         //this function finds the character from the compressed datastructure
-        char charFound = findCharacter(compressedVector, charIndex);
+        char charFound = findCharacter(indexRelativeElement, indexCStringElement, charIndex);
+        //cout << "character found at string " << stringIndex << " at index " << charIndex << " is " << charFound << " actual " << dnaArray[stringIndex][charIndex]<<endl;
         counter++;
     }
     //measuring time end
@@ -436,26 +453,26 @@ int main() {
     cout << "PROGRAM STARTING!!!" << endl;
     
     int i;
-    string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
-    //file name here
-    //string fileName = "Gen178.fa";
-    string fileName = "embl50.h178.fa";
     string location = location_main + fileName ;    
     int numberOfStrings = findSize(location);
-    string* dnaArray = new string[numberOfStrings];
+    dnaArray = new string[numberOfStrings];
     dnaArray = readDna(location, numberOfStrings);
     int* sizes = new int[numberOfStrings];
+    //set<int>* characters = new set<int>[numberOfStrings];
+
+    memoryVar += (sizeof(sizes) + (4*numberOfStrings));  //adding size of pointer for size array and each element of size array
+
+    cout << "memory var after size array " << memoryVar << endl;
 
     for (i = 0; i < numberOfStrings; i++) {
         sizes[i] = dnaArray[i].size();
+        memoryOld += sizes[i]; //adding length of each string
     }
 
     cout << "DNA ARRAY !!!" << endl;
 
     relativeString = dnaArray[0];
     memoryVar += sizeof(relativeString);  //adding space for reference string
-
-    cout << "size of relative string " << memoryVar << endl;
 
     relativeSize = relativeString.size();
 
@@ -464,9 +481,10 @@ int main() {
     setFingerPrintSingleChar();
     printSingleChar();
 
-    //vector<IndexLength>* compressedVectors = new vector<IndexLength> [numberOfStrings];
     indexRelative = new vector<int>[numberOfStrings];
     indexCString = new vector<int>[numberOfStrings];
+
+    memoryVar += (sizeof(indexRelative) + sizeof(indexCString)); //adding pointer size for both index arrays
 
     //to check how long it takes to compress all the data
     auto start = chrono::high_resolution_clock::now();
@@ -477,35 +495,42 @@ int main() {
     indexRelative[0].push_back(0);
     indexCString[0].push_back(0);
 
-    for (int j = 1; j < numberOfStrings; j++) {
-        cout << "compressing " << j << endl ;
-        string toCompress = dnaArray[j];
-        compress(toCompress, indexRelative[j], indexCString[j]);
-        memoryVar += (sizeof(indexRelative[j]) + sizeof(indexCString)); //adding space for encoding
-        //printCompressed(compressedVector);
+    //printCompressed(indexRelative[0], indexCString[0]);
+
+    for (i = 1; i < numberOfStrings; i++) {
+        cout << "compressing " << i << endl ;
+        string toCompress = dnaArray[i];
+        compress(toCompress, indexRelative[i], indexCString[i]);
+        //printCompressed(indexRelative[i], indexCString[i]);
+        memoryVar += (8*indexRelative[i].size()); //adding space for encoding
+        //cout << "size of string " << dnaArray[i].size() << " size of compressed structure " << 8*indexRelative[i].size() << endl;
+        //memoryVar += ((4 * indexRelative[i].size()) + (4 * indexCString[i].size())); //adding space for encoding
     }
+
+    memoryVar += relativeSize; //finally adding length of relative string as it was expanded
 
     delete[] dnaArray;
     cout << "AFTER COMPRESSION!!!" << endl;
 
-    auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::seconds>(stop - start);
-    cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
+    //auto stop = chrono::high_resolution_clock::now();
+    //auto duration = chrono::duration_cast<chrono::seconds>(stop - start);
+    //cout << "it took " << duration.count() << " seconds to compress " << numberOfStrings <<  endl;
 
-    processSingleCharRequestFromUser(numberOfStrings,sizes,indexRelative,indexCString);
-    //processSubstringFromUser(numberOfStrings, sizes, compressedVectors);
-    //auto durationMillion = processMillionRequest(numberOfStrings, sizes, compressedVectors);
+    //processSingleCharRequestFromUser(numberOfStrings,sizes);
+    //processSubstringFromUser(numberOfStrings, sizes);
+    auto durationMillion = processMillionRequest(numberOfStrings, sizes);
     //cout << durationMillion.count() <<" milliseconds to process million requests ";
-
+    //delete[] dnaArray;
     delete[] sizes;
     delete[] indexRelative;
     delete[] indexCString;
 
-    cout << "PROGRAM ENDING!!!" << endl;
+    cout << "PROGRAM ENDING!!! " << endl;
 
+    cout << "old memory : " << memoryOld << " compressed memory : " << memoryVar << endl;
     //string headers = "FILE_NAME;VERSION;MEMORY;TIME";
     location = location_main + "LOGS.csv";
     int timeUsed = 0;     
-    //writeLog(location, fileName, version, memoryVar, (int) durationMillion.count());
+    writeLog(location, fileName, version, memoryVar, (int) durationMillion.count());
 }
     
