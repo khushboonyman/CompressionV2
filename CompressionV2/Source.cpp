@@ -7,27 +7,36 @@
 #include <chrono>
 using namespace std;
 
-//change according to new version
+//GLOBAL VARIABLES THAT NEED TO BE CHANGED ACCORDINGLY
 int version = 2;
-string* dnaArray;
-//int runLimit = 10;
+int limit = 5;
+int recursiveLimit = 1000;
+//int runLimit = 100;
 int runLimit = 1000000;
+string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
+//file name here
+//string fileName = "test_ref_only.txt";
+
+//THESE TWO FILES SHOULD BE LOGGED
+string fileName = "Gen178.fa";
+//string fileName = "embl50.h178.fa";
+//change according to new version
+
+string* dnaArray;
 unordered_map<string, vector<int>> fingerPrints;
 unordered_map<char, int> singleChar;
-int limit = 5;
 string relativeString;
 int relativeSize;
 int countSingleChar = 0;
 int memoryVar = 0;
 int memoryOld = 0;
+
 int mb = 1024 * 1024;
 int kb = 1024;
-string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
-//file name here
-string fileName = "Gen178.fa";
-//string fileName = "embl50.h178.fa";
+
 vector<int>* indexRelative;
 vector<int>* indexCString;
+string extra = "";
 
 //FIND HOW MANY STRINGS ARE THERE
 int findSize(string location) {
@@ -254,7 +263,7 @@ int findLocation(vector<int>&indexCStringElement, int& charIndex) {
     int indexCStringCurrent, indexCStringNext, indexCStringNextNext;
     while (true) {
         count++;
-        if (count > 1000) {
+        if (count > recursiveLimit) {
             cout << "limit reached" << endl;
             break;
         }
@@ -279,14 +288,20 @@ int findLocation(vector<int>&indexCStringElement, int& charIndex) {
             }
         }
 
-        if (indexCStringCurrent > charIndex) {
-            last = mid;
+        if (mid == first) {
+            mid = last;
         }
         else {
-            first = mid;
-        }
+            if (indexCStringCurrent > charIndex) {
+                last = mid;
+            }
+            else {
+                first = mid;
+            }
 
-        mid = (first + last) / 2;          
+            mid = (first + last) / 2;
+        }
+                  
     }
     return mid;
 }
