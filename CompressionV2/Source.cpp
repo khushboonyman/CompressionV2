@@ -5,6 +5,7 @@
 #include <set>
 #include <math.h>
 #include <chrono>
+#include <vector>
 using namespace std;
 
 //GLOBAL VARIABLES THAT NEED TO BE CHANGED ACCORDINGLY
@@ -15,11 +16,11 @@ int recursiveLimit = 1000;
 int runLimit = 1000000;
 string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
 //file name here
-//string fileName = "test_ref_only.txt";
-
+//fileName = "test_ref_only.txt";
+string fileName = "genome.fa";
 //THESE TWO FILES SHOULD BE LOGGED
-string fileName = "Gen178.fa";
-//string fileName = "embl50.h178.fa";
+//fileName = "Gen178.fa";
+//fileName = "embl50.h178.fa";
 //change according to new version
 
 string* dnaArray;
