@@ -16,11 +16,12 @@ int recursiveLimit = 1000;
 int runLimit = 1000000;
 string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\datasets\\";
 //file name here
+//string fileName = "my_complete_genome.txt";
 //fileName = "test_ref_only.txt";
-string fileName = "genome.fa";
+//string fileName = "genome.fa";
 //THESE TWO FILES SHOULD BE LOGGED
-//fileName = "Gen178.fa";
-//fileName = "embl50.h178.fa";
+string fileName = "Gen178.fa";
+//string fileName = "embl50.h178.fa";
 //change according to new version
 
 string* dnaArray;
@@ -68,7 +69,7 @@ string* readDna(string location, int size) {
     while (myfile >> x) {
         if (x[0] == '>') {
             if (size > -1) {
-                temp += "$";
+                //temp += "$";
                 dnaArray[size] = temp;
             }
             temp = "";
@@ -78,7 +79,7 @@ string* readDna(string location, int size) {
             temp += x;
     }
 
-    temp += "$";
+    //temp += "$";
     dnaArray[size] = temp;
     myfile.close();
     cout << endl << "dna file closed" << endl;
@@ -511,6 +512,7 @@ int main() {
     indexRelative[0].push_back(0);
     indexCString[0].push_back(0);
 
+    memoryVar += 8; //adding size for compression of first string
     //printCompressed(indexRelative[0], indexCString[0]);
 
     for (i = 1; i < numberOfStrings; i++) {
