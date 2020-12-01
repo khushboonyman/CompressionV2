@@ -10,7 +10,7 @@ using namespace std;
 
 //GLOBAL VARIABLES THAT NEED TO BE CHANGED ACCORDINGLY
 int version = 2;
-int limit = 10;
+int limit = 5;
 int recursiveLimit = 1000;
 //int runLimit = 100;
 int runLimit = 1000000;
@@ -499,7 +499,7 @@ auto processMillionRequest(int& numberOfStrings, int* sizes) {
 }
 
 int main() {
-    cout << "PROGRAM STARTING!!!" << endl;
+    cout << "PROGRAM STARTING!!! with limit " << limit << " and file name " << fileName << endl;
     
     int i, numberOfStrings;
     string location = location_main + fileName ;   
