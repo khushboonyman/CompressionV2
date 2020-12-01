@@ -9,7 +9,7 @@
 using namespace std;
 
 //GLOBAL VARIABLES THAT NEED TO BE CHANGED ACCORDINGLY
-int version = 2;
+string version = "first string uncompressed";
 int limit = 5;
 int recursiveLimit = 1000;
 //int runLimit = 100;
@@ -76,7 +76,6 @@ int findSizePizzaChilli(string& location) {
 //CREATE ARRAY OF DNA STRINGS FROM THE FILE
 void readDna(string location, int size) {
     ifstream myfile;
-    dnaArray = new string[size];
     myfile.open(location);
     size = -1;
     string temp, x;
@@ -104,7 +103,6 @@ void readDna(string location, int size) {
 void readDnaPizzaChilli(string& location, int& size) {
     ifstream myfile;
     myfile.open(location);
-    dnaArray = new string[size];
     size = 0;
     string x;
     while (myfile >> x) {
@@ -116,7 +114,7 @@ void readDnaPizzaChilli(string& location, int& size) {
 }
 
 //WRITE A LOG TO THE FILE, WHICH WILL BE USED TO PLOT TIME AND SPACE USED BY COMPRESSION TECHNIQUE
-void writeLog(string location, string fileName, int version, int memoryVar, float compression, int time) {
+void writeLog(string location, string fileName, string version, int memoryVar, float compression, int time) {
     fstream myfile;
     myfile.open(location, fstream::app);
     cout << "log file opened" << endl;
