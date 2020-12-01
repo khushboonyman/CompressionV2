@@ -20,7 +20,7 @@ string location_main = "C:\\Users\\Bruger\\Desktop\\books\\THESIS start aug 3\\d
 //fileName = "test_ref_only.txt";
 //string fileName = "genome.fa";
 //THESE TWO FILES SHOULD BE LOGGED
-string fileName = "Gen178.fa";
+string fileName = "dna.200MB";
 //string fileName = "embl50.h178.fa";
 //change according to new version
 
@@ -87,12 +87,12 @@ string* readDna(string location, int size) {
 }
 
 //WRITE A LOG TO THE FILE, WHICH WILL BE USED TO PLOT TIME AND SPACE USED BY COMPRESSION TECHNIQUE
-void writeLog(string location, string fileName, int version, int memoryVar, int time) {
+void writeLog(string location, string fileName, int version, int memoryVar, float compression, int time) {
     fstream myfile;
     myfile.open(location, fstream::app);
     cout << "log file opened" << endl;
     myfile << "\n";
-    myfile << fileName << ";" << version << ";" << memoryVar << ";" << time;
+    myfile << fileName << ";" << version << ";" << memoryVar << ";" << compression << ";" << time;
     myfile.close();
     cout << "log file closed" << endl;
 }
@@ -547,8 +547,8 @@ int main() {
 
     cout << "old memory : " << memoryOld << " compressed memory : " << memoryVar << endl;
     //string headers = "FILE_NAME;VERSION;MEMORY;TIME";
+    float compression = (float(memoryVar) / float(memoryOld)) * 100;
     location = location_main + "LOGS.csv";
-    int timeUsed = 0;     
-    writeLog(location, fileName, version, memoryVar, (int) durationMillion.count());
+    writeLog(location, fileName, version, memoryVar, compression, (int) durationMillion.count());
 }
     
