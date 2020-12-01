@@ -10,7 +10,7 @@ using namespace std;
 
 //GLOBAL VARIABLES THAT NEED TO BE CHANGED ACCORDINGLY
 int version = 2;
-int limit = 5;
+int limit = 10;
 int recursiveLimit = 1000;
 //int runLimit = 100;
 int runLimit = 1000000;
@@ -57,10 +57,25 @@ int findSize(string location) {
     return size;
 }
 
-//CREATE ARRAY OF DNA STRINGS FROM THE FILE
-string* readDna(string location, int size) {
+//FIND HOW MANY STRINGS ARE THERE
+int findSizePizzaChilli(string& location) {
     ifstream myfile;
-    string* dnaArray;
+    myfile.open(location);
+    cout << "dna file opened" << endl;
+    string x;
+
+    int size = 0;
+    while (myfile >> x) {
+        size += 1;
+    }
+
+    myfile.close();
+    return size;
+}
+
+//CREATE ARRAY OF DNA STRINGS FROM THE FILE
+void readDna(string location, int size) {
+    ifstream myfile;
     dnaArray = new string[size];
     myfile.open(location);
     size = -1;
@@ -83,7 +98,21 @@ string* readDna(string location, int size) {
     dnaArray[size] = temp;
     myfile.close();
     cout << endl << "dna file closed" << endl;
-    return dnaArray;
+}
+
+//CREATE ARRAY OF DNA STRINGS FROM THE FILE
+void readDnaPizzaChilli(string& location, int& size) {
+    ifstream myfile;
+    myfile.open(location);
+    dnaArray = new string[size];
+    size = 0;
+    string x;
+    while (myfile >> x) {
+        dnaArray[size] = x;
+        size++;
+    }
+    myfile.close();
+    cout << endl << "dna file closed and size " << size << endl;
 }
 
 //WRITE A LOG TO THE FILE, WHICH WILL BE USED TO PLOT TIME AND SPACE USED BY COMPRESSION TECHNIQUE
@@ -148,7 +177,9 @@ int findSingleChar(char &checkChar) {
 void setFingerPrintSingleChar() {
     int i;
     for (i = 0; i <= relativeSize - limit; i++) {
-        string fingerPrint = relativeString.substr(i, limit);
+        string fingerPrint;
+        fingerPrint.reserve(limit);
+        fingerPrint.append(relativeString, i, limit);
         char single = relativeString[i];
         unordered_map<string, vector<int>>::const_iterator it = fingerPrints.find(fingerPrint);
         unordered_map<char, int>::const_iterator itC = singleChar.find(single);
@@ -191,7 +222,8 @@ void compress(string& toCompress, vector<int>& indexRelativeElement, vector<int>
     while (start <= end - limit) {
         vector<int> indices;
         string checkFingerPrint;
-        checkFingerPrint = toCompress.substr(start, limit);
+        checkFingerPrint.reserve(limit);
+        checkFingerPrint.append(toCompress, start, limit);
         indices = findFingerPrint(checkFingerPrint);
         //limit size substring fingerprint not found
         if (indices.size() == 0) {
@@ -469,11 +501,26 @@ auto processMillionRequest(int& numberOfStrings, int* sizes) {
 int main() {
     cout << "PROGRAM STARTING!!!" << endl;
     
-    int i;
-    string location = location_main + fileName ;    
-    int numberOfStrings = findSize(location);
+    int i, numberOfStrings;
+    string location = location_main + fileName ;   
+
+    if (fileName.substr(0, 3) == "dna" || fileName.substr(0, 3) == "pro") {
+        numberOfStrings = findSizePizzaChilli(location);
+    }
+    else {
+        numberOfStrings = findSize(location);
+    }
+
     dnaArray = new string[numberOfStrings];
-    dnaArray = readDna(location, numberOfStrings);
+    cout << "NUMBER OF STRINGS " << numberOfStrings << endl;
+
+    if (fileName.substr(0, 3) == "dna" || fileName.substr(0, 3) == "pro") {
+        readDnaPizzaChilli(location, numberOfStrings);
+    }
+    else {
+        readDna(location, numberOfStrings);
+    }
+
     int* sizes = new int[numberOfStrings];
     //set<int>* characters = new set<int>[numberOfStrings];
 
@@ -545,9 +592,10 @@ int main() {
 
     cout << "PROGRAM ENDING!!! " << endl;
 
-    cout << "old memory : " << memoryOld << " compressed memory : " << memoryVar << endl;
-    //string headers = "FILE_NAME;VERSION;MEMORY;TIME";
+    //string headers = "FILE_NAME;VERSION;MEMORY;COMPRESSION;TIME";
     float compression = (float(memoryVar) / float(memoryOld)) * 100;
+    cout << "old memory : " << memoryOld << " compressed memory : " << memoryVar << " compression : " << compression << endl;
+    
     location = location_main + "LOGS.csv";
     writeLog(location, fileName, version, memoryVar, compression, (int) durationMillion.count());
 }
